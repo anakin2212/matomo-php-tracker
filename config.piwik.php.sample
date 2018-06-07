@@ -1,0 +1,4 @@
+<?php
+define('TRACK', 'codice_token_auth'); //valore stringale pari a "true" o "false"
+define('TRACK_HOST', "localhost");
+?>
