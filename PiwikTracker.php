@@ -558,7 +558,6 @@ class PiwikTracker
         $this->generateNewPageviewId();
 
         $url = $this->getUrlTrackPageView($documentTitle);
-
         return $this->sendRequest($url);
     }
 
@@ -1522,6 +1521,7 @@ class PiwikTracker
      */
     protected function sendRequest($url, $method = 'GET', $data = null, $force = false)
     {
+        error_log($url);
         self::$DEBUG_LAST_REQUESTED_URL = $url;
 
         // if doing a bulk request, store the url
@@ -1552,6 +1552,8 @@ class PiwikTracker
                 CURLOPT_HTTPHEADER => array(
                     'Accept-Language: ' . $this->acceptLanguage,
                 ),
+                CURLOPT_SSL_VERIFYHOST => false,
+                CURLOPT_SSL_VERIFYPEER => false,
             );
 
             if (defined('PATH_TO_CERTIFICATES_FILE')) {
@@ -1581,7 +1583,6 @@ class PiwikTracker
                 $options[CURLOPT_COOKIE] = http_build_query($this->outgoingTrackerCookies);
                 $this->outgoingTrackerCookies = array();
             }
-            
             $ch = curl_init();
             curl_setopt_array($ch, $options);
             ob_start();
