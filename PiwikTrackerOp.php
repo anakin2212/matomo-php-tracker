@@ -1,9 +1,8 @@
 <?php
-require_once "PiwikTracker.php";
 
-if(defined(TRACK)) {
+if(defined("TRACK")) {
   $user = new GCUser();
-  PiwikTracker::$URL = 'https://geoweb-dev.master.local/piwik/';
+  PiwikTracker::$URL = 'https://'.TRACK_HOST.'/piwik/';
 
   $piwikTracker = new PiwikTracker("1");
 
@@ -11,7 +10,7 @@ if(defined(TRACK)) {
   // Learn more about token_auth: https://matomo.org/faq/general/faq_114/
   $piwikTracker->setTokenAuth(TRACK);
 
-  $piwikTracker->setUserId($user->isAuthenticated() ? $user->getUsername() : "<anonymous_".session_id().">");
+  $piwikTracker->setUserId($user->isAuthenticated() ? $user->getUsername() : "-anonymous_".session_id()."-");
 
   // Sends Tracker request via http
   $piwikTracker->doTrackPageView($_SERVER['PHP_SELF']);

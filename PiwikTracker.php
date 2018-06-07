@@ -2048,3 +2048,4 @@ function Piwik_getUrlTrackGoal($idSite, $idGoal, $revenue = 0.0)
 
     return $tracker->getUrlTrackGoal($idGoal, $revenue);
 }
+
