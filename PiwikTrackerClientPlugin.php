@@ -7,7 +7,7 @@
         $(document).ready(function() {
           var u=\"//".TRACK_HOST."/piwik/\";
           _paq.push(['setTrackerUrl', u+'piwik.php']);
-          _paq.push(['setSiteId', '1']);
+          _paq.push(['setSiteId', '".ID_TRACK_SITE."']);
           _paq.push(['setUserId',clientConfig.CLIENT_ID]);
           _paq.push(['trackPageView']);
           _paq.push(['enableLinkTracking']);
