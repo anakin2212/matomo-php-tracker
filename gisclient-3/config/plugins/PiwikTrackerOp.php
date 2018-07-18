@@ -2,29 +2,23 @@
 
 require_once('config.piwik.php');
 require_once('PiwikTracker.php');
+require_once('DBFunctions.php');
 
 if(defined("TRACK")) {
-  $user = new GCUser();
   PiwikTracker::$URL = 'https://'.TRACK_HOST.'/piwik/';
 
   $piwikTracker = new PiwikTracker(ID_TRACK_SITE);
-
+  $emptySession = !isset($_COOKIE[GC_SESSION_NAME]);
+  $user = new GCUser();
   // Specify an API token with at least Admin permission, so the Visitor IP address can be recorded
   // Learn more about token_auth: https://matomo.org/faq/general/faq_114/
   $piwikTracker->setTokenAuth(TRACK);
 
   $piwikTracker->setUserId($user->isAuthenticated() ? $user->getUsername() : "-anonymous_".session_id()."-");
-
-  // Sends Tracker request via http
-  //error_log(json_encode($_POST));
-  if(!empty($_GET))
-    $piwikTracker->setCustomTrackingParameter("dimension1", json_encode($_GET));
-  if(isset($_POST["parametri"]))
-    $piwikTracker->setCustomTrackingParameter("dimension2", json_encode($_POST["parametri"]));
-  if(isset($_POST["mode"]) || isset($_POST["modo"]))
-    $piwikTracker->setCustomTrackingParameter("dimension3", $_POST["mode"].$_POST["modo"]);
-  if(isset($_POST["azione"]))
-    $piwikTracker->setCustomTrackingParameter("dimension4", $_POST["azione"]);
+  if($emptySession) {
+    $piwikTracker->setCustomTrackingParameter("dimension1", $_SERVER['PHP_SELF']);
+    $piwikTracker->setCustomTrackingParameter("dimension2", $_SERVER['REMOTE_ADDR']);
+  }
 
   $piwikTracker->doTrackPageView($_SERVER['PHP_SELF']);
 

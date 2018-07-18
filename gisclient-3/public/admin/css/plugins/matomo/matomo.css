@@ -1,0 +1,15 @@
+.entityLine {
+  background: white;
+  padding: 8px 8px 0px 8px;
+  float: left;
+}
+
+.entityLineCounter {
+  background: white;
+  padding: 8px;
+  text-align: right;
+}
+
+.entityLineChildren {
+  padding: 10px 0px 10px 10px;
+}
