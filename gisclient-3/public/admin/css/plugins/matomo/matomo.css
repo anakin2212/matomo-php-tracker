@@ -4,6 +4,11 @@
   float: left;
 }
 
+.entityMessage {
+  background: white;
+  padding: 8px;
+}
+
 .entityLineCounter {
   background: white;
   padding: 8px;

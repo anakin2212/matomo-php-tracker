@@ -15,25 +15,25 @@
           _paq.push(['enableLinkTracking']);
           var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
           g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
-          window.alert('Tutto bene');
         });
       }
       function registerMapServerRequest() {
         $(document).ready(function() {
           GisClientMap.map.events.register('moveend', GisClientMap.map, function() {
             if(GisClientMap.map.zoom >= (GisClientMap.map.getNumZoomLevels() - ".TRACK_ZOOM_OFFSET.")) {
-              $.get(GisClientMap.baseUrl + '".TRACK_SERVICE_LOCATION."', {
-                projection : GisClientMap.map.projection,
-                center: GisClientMap.map.center.lon + ',' + GisClientMap.map.center.lat,
-                map: GisClientMap.map.config.mapsetTitle,
-                project: GisClientMap.map.config.projectTitle,
-                user: clientConfig.CLIENT_ID,
+              var extent = GisClientMap.map.getExtent();
+              $.get(GisClientMap.baseUrl + '".TRACK_SERVICE_LOCATION."',
+                {
+                  projection : GisClientMap.map.projection,
+                  extent: extent.bottom + ',' + extent.left + ',' + extent.right + ',' + extent.top,
+                  map: GisClientMap.map.config.mapsetTitle,
+                  project: GisClientMap.map.config.projectTitle,
+                  user: clientConfig.CLIENT_ID,
                 },
                 function(returnedData){
                   if(returnedData != '')
                     window.alert(returnedData);
-                }
-              );
+              });
             }
           });
         });

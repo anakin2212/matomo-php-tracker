@@ -8,12 +8,19 @@
     /* Costruisce un oggetto gcMapRequest a partire da un dataset recuperato da tabella
     gisclient_3.maprequest*/
     public static function createEntities($orderedDataset = array(), $matomoFilters) {
+      return self::createEntitiesFromIndexField(self::createEntitiesForMap($orderedDataset, $matomoFilters), 0);
+    }
+    
+    public static function createEntitiesForMap($orderedDataset = array(), $matomoFilters) {
+      error_log($matomoFilters);
       $filteredDataset = array();
       if(!empty($matomoFilters)) {
-        $filteredDataset = (new gcMapRequestFilter($matomoFilters))->applyTimeFiltersOnDataset($orderedDataset);
+        $filterManager = new gcMapRequestFilter($matomoFilters);
+        $filteredDataset = $filterManager->applyTimeFiltersOnDataset($orderedDataset);
+        $filteredDataset = $filterManager->applyUserAndIpFilters($filteredDataset);
       } else
         $filteredDataset = $orderedDataset;
-      return self::createEntitiesFromIndexField($filteredDataset, 0);
+      return $filteredDataset;
     }
     
     private function createEntitiesFromIndexField($orderedDataset, $indexLabel) {
@@ -36,11 +43,8 @@
                 }
                 $previous = [$key, $value];
                 break;
-              case 'bboxlon':
+              case 'bbox':
                 $choords = $value;
-                break;
-              case 'bboxlat':
-                $choords .= ",".$value;
                 $ent->addChild($previous, new gcMapRequestEntity("choords", $choords, $counter));
                 $previous = ["choords", $choords];
                 break;
@@ -81,6 +85,21 @@
 
     function getValue() {
       return $this->value;
+    }
+    
+    function getTableKey() {
+      switch($this->key) {
+        case 'project':
+          return "Nome progetto";
+        case 'map':
+          return "Mappa";
+        case 'choords':
+          return "Punto centrale di view";
+        case 'user':
+          return "Utente (indirizzo IP)";
+        default:
+          return $this->key;
+      }
     }
 
     function getKey() {

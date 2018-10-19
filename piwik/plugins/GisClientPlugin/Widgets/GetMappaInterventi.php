@@ -8,7 +8,7 @@
  */
 namespace Piwik\Plugins\GisClientPlugin\Widgets;
 
-
+//use Piwik\Widget\Widget;
 use Piwik\Widget\WidgetConfig;
 use Piwik\View;
 use Piwik\Plugins\GisClientPlugin\Widgets\GetIntervento;
@@ -19,9 +19,8 @@ use Piwik\Plugins\GisClientPlugin\Widgets\GetIntervento;
  * To configure a widget simply call the corresponding methods as described in the API-Reference:
  * http://developer.piwik.org/api-reference/Piwik/Plugin\Widget
  */
-class GetPuntiintervento extends GetIntervento
+class GetMappaInterventi extends GetIntervento
 {
-
     public static function configure(WidgetConfig $config)
     {
         /**
@@ -38,7 +37,7 @@ class GetPuntiintervento extends GetIntervento
         /**
          * Set the name of the widget belongs to.
          */
-        $config->setName('GisClientPlugin_Puntiintervento');
+        $config->setName('Mappa degli interventi');
 
         /**
          * Set the order of the widget. The lower the number, the earlier the widget will be listed within a category.
@@ -72,11 +71,11 @@ class GetPuntiintervento extends GetIntervento
      * @return string
      */
     public function render() {
-        // or: return $this->renderTemplate('myViewTemplate', array(...view variables...));
-        $passingParams = $this->getGisClientUrlInfo();
-        $html = '<iframe width="100%" height="500px" src="'.$passingParams["host"].'/gisclient3/services/plugins/matomo/manageMapRequestPoint.php?action=view'
-             .(!empty($passingParams["query"]) ? '&'.http_build_query($passingParams["query"]) : '').'"></iframe>';
-        return $html;
+      // or: return $this->renderTemplate('myViewTemplate', array(...view variables...));
+      $passingParams = $this->getGisClientUrlInfo();
+      $html = '<iframe width="100%" height="500px" src="'.$passingParams["host"].'/gisclient3-maps/jquery/intervention.php'
+        .(!empty($passingParams["query"]) ? '?'.http_build_query($passingParams["query"]) : '').'"></iframe>';
+      return $html;
     }
 
 }

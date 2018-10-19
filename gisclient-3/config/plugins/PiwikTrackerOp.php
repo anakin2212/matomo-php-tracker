@@ -4,7 +4,7 @@ require_once('config.piwik.php');
 require_once('PiwikTracker.php');
 require_once('DBFunctions.php');
 
-if(defined("TRACK")) {
+if(defined("TRACK") && defined("TRACK_SERVICE_LOCATION") && (strpos($_SERVER['PHP_SELF'], TRACK_SERVICE_LOCATION) === false)) {
   PiwikTracker::$URL = 'https://'.TRACK_HOST.'/piwik/';
 
   $piwikTracker = new PiwikTracker(ID_TRACK_SITE);
@@ -29,6 +29,5 @@ if(defined("TRACK")) {
   if(substr($_SERVER['PHP_SELF'], strlen($_SERVER['PHP_SELF']) - strlen("session.php") ) == "session.php")
     $piwikTracker->doTrackEvent("Profilazione", "Disattivazione sessione utente precedente");
 }
-//se php_self contiene login -> registro la login
-//se php_self contiene session.php  -> registro il logout (dovuto a vero logout o a fine sessione)
+
 ?>
