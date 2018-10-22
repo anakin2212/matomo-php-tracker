@@ -5,6 +5,7 @@
 <script src="../resources/jslib/jquery.easyui.min.js"></script>
 <script src="../resources/jslib/OpenLayers.js"></script>
 <script src="../resources/jslib/proj4js.js"></script>
+<!--script src="../config/config.dynamic.js"></script-->
 <script src="../config/config.js"></script>
  <TITLE>Punti intervento</TITLE>
  <style>
@@ -112,7 +113,7 @@ $(document).ready(function() {
   clusters.events.on({"featureselected": display});
   polygons.events.on({"featureselected": displayPolygon});
   $.ajax({
-    url: GISCLIENT_URL + "/services/plugins/matomo/manageMapRequestPoint.php",
+    url: clientConfig.GISCLIENT_URL + "/services/plugins/matomo/manageMapRequestPoint.php",
     data: {action : "map", srid: "EPSG:3857", query_args: <?php echo "'".$_SERVER["QUERY_STRING"]."'" ?>},
     dataType: "json",
     success: function(data) {
@@ -187,7 +188,7 @@ function reloadPoint() {
   shape = [];
   reset();
   $.ajax({
-    url: "https://geoweb-dev.master.local/gisclient3/services/plugins/matomo/manageMapRequestPoint.php",
+    url: clientConfig.GISCLIENT_URL + "/services/plugins/matomo/manageMapRequestPoint.php",
     data: {action : "map", srid: "EPSG:3857", query_args: <?php echo "'".$_SERVER["QUERY_STRING"]."'" ?>},
     dataType: "json",
     success: function(data) {
