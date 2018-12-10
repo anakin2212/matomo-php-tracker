@@ -51,7 +51,7 @@
   function createGeoJSONPolygonGeometry($geom, $project, $mapSRID) {
     $headlessDefaultSRID = str_replace("EPSG:","", TRACK_SRID);
     $headlessMapSRID = str_replace("EPSG:","", $mapSRID);
-    $SRS_params = getProjParams($project, [$headlessDefaultSRID, $headlessMapSRID]);
+    $SRS_params = getMatomoProjParams($project, [$headlessDefaultSRID, $headlessMapSRID]);
     $stt = $geom[1]." ".$geom[3].", ".$geom[2]." ".$geom[3].", ".$geom[2]." ".$geom[0].", ".$geom[1]." ".$geom[0].", ".$geom[1]." ".$geom[3];
     $wkt = "st_geomfromtext('POLYGON((".$stt."))', $headlessMapSRID)";
 	if($headlessMapSRID != $headlessDefaultSRID) {
@@ -69,7 +69,7 @@
   function parseGeoJSONPolygonGeometry($geom, $project, $mapSRID) {
     $headlessDefaultSRID = str_replace("EPSG:","", TRACK_SRID);
     $headlessMapSRID = str_replace("EPSG:","", $mapSRID);
-    $SRS_params = getProjParams($project, [$headlessDefaultSRID, $headlessMapSRID]);
+    $SRS_params = getMatomoProjParams($project, [$headlessDefaultSRID, $headlessMapSRID]);
     $stt = $geom[1]." ".$geom[3].", ".$geom[2]." ".$geom[3].", ".$geom[2]." ".$geom[0].", ".$geom[1]." ".$geom[0].", ".$geom[1]." ".$geom[3];
     $wkt = "st_geomfromtext('POLYGON((".$stt."))', $headlessMapSRID)";
 	if($mapSRID != $headlessDefaultSRID) {
@@ -84,7 +84,7 @@
 	return $wkt;
   }
 
-  function getProjParams($project, $sridArr){
+  function getMatomoProjParams($project, $sridArr){
     $result = array();
     $db = GCApp::getDB();
 	$sridStr = "";
