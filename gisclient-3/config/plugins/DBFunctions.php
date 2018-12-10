@@ -6,7 +6,7 @@
     $point = (($srid == null) ? "bbox" : "st_transform(bbox, '".str_replace("EPSG:","", $srid)."')");
     $point = $centralBox ? "ST_CENTROID(".$point.")" : $point;
     $point = "ST_AsText(".$point.")";
-    $sql = "select project, map || ' (".TRACK_SRID.")' as map, $point as bbox, \"user\", ip_address, date_insert, counter from gisclient_3.maprequest order by project, map";
+    $sql = "select project, map || ' (".TRACK_SRID.")' as map, $point as bbox, \"user\", ip_address, date_insert, counter from public.maprequest order by project, map";
     $stmt = $db->prepare($sql);
     if($stmt->execute())
       return $stmt->fetchAll();
@@ -18,7 +18,7 @@
       $workedCenter = createGeoJSONPolygonGeometry($extent, $args["project"], $args['projection']);
       $db = GCApp::getDb();
       //verifico se esiste
-      $sql = 'select requestid, counter, ST_CONTAINS('.$workedCenter.', bbox) as contained  from gisclient_3.maprequest where project = :project and map = :map '//and srs = :srs '
+      $sql = 'select requestid, counter, ST_CONTAINS('.$workedCenter.', bbox) as contained  from public.maprequest where project = :project and map = :map '//and srs = :srs '
         .'and (ST_CONTAINS('.$workedCenter.', bbox) or ST_CONTAINS(bbox, '.$workedCenter.')) '
         .'and "user" = :usr and ip_address = :ip';
       $prot = array(
@@ -31,12 +31,12 @@
       //se esiste update
       $res=$stmt->fetchAll();
       if(($result == 1) && (count($res) == 1)) {
-        $sql = 'update gisclient_3.maprequest set counter = '.($res[0]["counter"] + 1)
+        $sql = 'update public.maprequest set counter = '.($res[0]["counter"] + 1)
                .($res['contained']== true ? ', bbox='.parseGeoJSONPolygonGeometry($extent, $args["project"], $args["projection"]) : '')
                .' where requestid = '.$res[0]["requestid"];
         $sqlArgs = array();
       } else {
-        $sql = 'insert into gisclient_3.maprequest(project, map, bbox, "user", ip_address) values(:project, :map, '.parseGeoJSONPolygonGeometry($extent, $args["project"], $args["projection"]).', :usr, :ip)';
+        $sql = 'insert into public.maprequest(project, map, bbox, "user", ip_address) values(:project, :map, '.parseGeoJSONPolygonGeometry($extent, $args["project"], $args["projection"]).', :usr, :ip)';
         $sqlArgs = array(
           'project'=>$args["project"],
           'map'=>$args["map"],

@@ -5,8 +5,7 @@
   class gcMapRequestEntityFactory {
     static private $countLabel = "counter";
 
-    /* Costruisce un oggetto gcMapRequest a partire da un dataset recuperato da tabella
-    gisclient_3.maprequest*/
+    /* Costruisce un oggetto gcMapRequest a partire da un dataset recuperato da tabella public.maprequest*/
     public static function createEntities($orderedDataset = array(), $matomoFilters) {
       return self::createEntitiesFromIndexField(self::createEntitiesForMap($orderedDataset, $matomoFilters), 0);
     }

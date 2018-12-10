@@ -1,8 +1,8 @@
-﻿-- Table: gisclient_3.maprequest
+﻿-- Table: public.maprequest
 
--- DROP TABLE gisclient_3.maprequest;
+-- DROP TABLE public.maprequest;
 
-CREATE TABLE gisclient_3.maprequest
+CREATE TABLE public.maprequest
 (
   requestid serial NOT NULL,
   project character varying(255),
@@ -18,6 +18,6 @@ CREATE TABLE gisclient_3.maprequest
 WITH (
   OIDS=FALSE
 );
-ALTER TABLE gisclient_3.maprequest
+ALTER TABLE public.maprequest
   OWNER TO "postgres";
 
