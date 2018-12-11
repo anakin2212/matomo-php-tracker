@@ -2,7 +2,7 @@
   require_once (ROOT_PATH.'lib/gcapp.class.php');
   
   function listMapServerRequests($srid = null, $centralBox = FALSE) {
-    $db = GCApp::getDb();
+    $db = GCApp::getDB();
     $point = (($srid == null) ? "bbox" : "st_transform(bbox, '".str_replace("EPSG:","", $srid)."')");
     $point = $centralBox ? "ST_CENTROID(".$point.")" : $point;
     $point = "ST_AsText(".$point.")";

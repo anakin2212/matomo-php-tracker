@@ -1,5 +1,5 @@
 <?php
-  require_once(ROOT_PATH."config/config.php");
+  require_once("../../../../config/config.php");
   require_once(ROOT_PATH."lib/plugins/matomo/gcMapRequestEntity.class.php");
 
   $args = array();

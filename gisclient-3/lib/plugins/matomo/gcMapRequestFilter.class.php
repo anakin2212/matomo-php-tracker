@@ -127,25 +127,30 @@
           $insert = false;
           switch($this->filter["period"]) {
             case 'day':
-              $insert = (strcmp(date("Ymd", strtotime($singleRow["date_insert"])), date("Ymd", strtotime($this->filter["date"]))) == 0);
+              $auxToday = strcmp($this->filter["date"], "today") == 0 ? date("Y-m-d") : $this->filter["date"];
+              $dateInsert = DateTime::createFromFormat("d/m/Y H:i:s.u", $singleRow["date_insert"]);
+              $insert = strcmp($dateInsert->format("Y-m-d"), $auxToday) == 0;
               break;
             case 'week':
-              $objA = new DateTime(date("Ymd", strtotime($this->filter["date"])));
-              $objB = new DateTime(date("Ymd", strtotime($singleRow["date_insert"])));
+              $objA = DateTime::createFromFormat("Y-m-d", $this->filter["date"]);
+              $objB = DateTime::createFromFormat("d/m/Y H:i:s.u", $singleRow["date_insert"]);
               $insert = ($objA->format("W") == $objB->format("W"));
               break;
             case 'month':
-              $insert = (strcmp(date("m", strtotime($singleRow["date_insert"])), date("m", strtotime($this->filter["date"]))) == 0);
+              $objA = DateTime::createFromFormat("Y-m-d", $this->filter["date"]);
+              $objB = DateTime::createFromFormat("d/m/Y H:i:s.u", $singleRow["date_insert"]);
+              $insert = (strcmp($objA->format("m"), $objB->format("m")) == 0);
               break;
             case 'year':
-              $insert = (strcmp(date("Y", strtotime($singleRow["date_insert"])), date("Y", strtotime($this->filter["date"]))) == 0);
+              $objA = DateTime::createFromFormat("Y-m-d", $this->filter["date"]);
+              $objB = DateTime::createFromFormat("d/m/Y H:i:s.u", $singleRow["date_insert"]);
+              $insert = (strcmp($objA->format("Y"), $objB->format("Y")) == 0);
               break;
             case 'range':
               $filterDates = explode(",", $this->filter["date"]);
-              error_log(date("Ymd", strtotime($singleRow["date_insert"]))." ".date("Ymd", strtotime($filterDates[0]))." ".date("Ymd", strtotime($filterDates[1])));
-              error_log(
-              $insert = (strcmp(date("Ymd", strtotime($singleRow["date_insert"])), date("Ymd", strtotime($filterDates[0]))) >= 0) &&
-                        (strcmp(date("Ymd", strtotime($singleRow["date_insert"])), date("Ymd", strtotime($filterDates[1]))) <=0));
+              $dateInsert = DateTime::createFromFormat("d/m/Y H:i:s.u", $singleRow["date_insert"]);
+              $insert = (strcmp($dateInsert->format("Y-m-d"), $filterDates[0]) >= 0) &&
+                        (strcmp($dateInsert->format("Y-m-d"), $filterDates[1]) <=0);
               break;
             default:
               break;
