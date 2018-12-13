@@ -162,7 +162,7 @@ $(document).ready(function() {
         for(var i = 0; i < clusters.features.length; i++) {
           var auxLonLat = new OpenLayers.LonLat(clusters.features[i].geometry.x, clusters.features[i].geometry.y);
           var centerPix = map.getPixelFromLonLat(auxLonLat);
-          var ray = clusters.features[0].attributes.count * 5;
+          var ray = (clusters.features[i].attributes.count > 5) ? 25 : clusters.features[i].attributes.count * 5
           var choords = [map.getLonLatFromPixel(centerPix.add(-ray , ray)) , map.getLonLatFromPixel(centerPix.add(ray , ray)),
             map.getLonLatFromPixel(centerPix.add(ray , -ray)), map.getLonLatFromPixel(centerPix.add(-ray , -ray))];
           var arrChoords = [new OpenLayers.Geometry.Point(choords[0].lon, choords[0].lat), new OpenLayers.Geometry.Point(choords[1].lon, choords[1].lat),
