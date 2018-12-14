@@ -37,7 +37,7 @@ class GetMappaInterventi extends GetIntervento
         /**
          * Set the name of the widget belongs to.
          */
-        $config->setName('Mappa degli interventi');
+        $config->setName('Mappa delle visualizzazioni');
 
         /**
          * Set the order of the widget. The lower the number, the earlier the widget will be listed within a category.

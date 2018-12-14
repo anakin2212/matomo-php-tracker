@@ -1,6 +1,6 @@
 {
     "GisClientPlugin": {
         "GisClient": "GisClient",
-        "Puntiintervento": "Centro area intervento/Numero visite"
+        "Puntiintervento": "Centro area visualizzazioni/Numero visite"
     }
 }
