@@ -17,10 +17,34 @@ html, body {
   min-height: 100%;
 }
 
+#map-header {
+  position: absolute;
+  height: 30px;
+  width: 100%;
+  color: #FFFFFF;
+  background-color: grey;
+  box-shadow: 1px 1px 1px 1px #000000;
+  text-align: right;
+}
+
+#mapset-switcher {
+  position: relative;
+  top: 3px;
+  right: 5px;
+}
+
+#map {
+  bottom: 0px;
+  position: absolute;
+  top: 28px;
+  width: 100%;
+}
+
 .toolbar {
   right: 5px;
   top: 10px;
 }
+
 
 .toolbar .olControlZoomBoxItemInactive {
   background-color: aliceblue;

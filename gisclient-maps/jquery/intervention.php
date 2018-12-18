@@ -14,6 +14,9 @@
  <TITLE>Punti intervento</TITLE>
 </HEAD>
 <BODY>
+<div id="map-header">
+  <span id="mapset-switcher"><select id="mapset" style="color: black"></select></span>
+</div>
 <div id="map"></div>
 <script type="text/javascript">
 var strategy, clusters, polygons;
@@ -105,25 +108,11 @@ $(document).ready(function() {
     data: {action : "map", srid: "EPSG:3857", query_args: <?php echo "'".$_SERVER["QUERY_STRING"]."'" ?>},
     dataType: "json",
     success: function(data) {
-      if(data.length > 0) {
-        data.forEach(function(item, index, arr) {
-          var currentShape = OpenLayers.Geometry.fromWKT(item.bbox);
-          features.push(new OpenLayers.Feature.Vector(currentShape.getCentroid(), {
-            project: item.project,
-            map: item.map,
-            counter: item.counter,
-            bbox: currentShape.getCentroid().x + ", " + currentShape.getCentroid().y
-          }));
-          shape.push(new OpenLayers.Feature.Vector(currentShape, {
-            project: item.project,
-            map: item.map,
-            counter: item.counter,
-            bbox: currentShape.getCentroid().x + ", " + currentShape.getCentroid().y
-          }));
-          if((index+1) == arr.length)
-            reset();
-        });
-      } else {
+       $("#mapset").find('option').remove().end();
+      $("#mapset").css("display", (data.length > 0) ? "" : "none");
+      if(data.length > 0)
+        populateFeaturesAndShapes(data);
+      else {
         var center = map.getPixelFromLonLat(map.getCenter());
         var nwchoords = new OpenLayers.Pixel(center.x - 150, center.y - 80);
         popup = new OpenLayers.Popup("chicken",
@@ -219,26 +208,38 @@ function reloadPoint() {
     data: {action : "map", srid: "EPSG:3857", query_args: <?php echo "'".$_SERVER["QUERY_STRING"]."'" ?>},
     dataType: "json",
     success: function(data) {
-      if(data.length > 0) {
-        data.forEach(function(item, index, arr) {
-          var currentShape = OpenLayers.Geometry.fromWKT(item.bbox);
-          features.push(new OpenLayers.Feature.Vector(currentShape.getCentroid(), {
-            project: item.project,
-            map: item.map,
-            counter: item.counter,
-            bbox: currentShape.getCentroid().x + ", " + currentShape.getCentroid().y
-          }));
-          shape.push(new OpenLayers.Feature.Vector(currentShape, {
-            project: item.project,
-            map: item.map,
-            counter: item.counter,
-            bbox: currentShape.getCentroid().x + ", " + currentShape.getCentroid().y
-          }));
+      $("#mapset").find('option').remove().end();
+      $("#mapset").css("display", (data.length > 0) ? "" : "none");
+      if(data.length > 0)
+        populateFeaturesAndShapes(data);
+    }
+  });
+}
 
-          if((index+1) == arr.length)
-            reset();
-        });
-      }
+function populateFeaturesAndShapes(data) {
+  var mapList = ["- Nessuna mappa selezionata -"];
+  data.forEach(function(item, index, arr) {
+    var currentShape = OpenLayers.Geometry.fromWKT(item.bbox);
+    features.push(new OpenLayers.Feature.Vector(currentShape.getCentroid(), {
+      project: item.project,
+      map: item.map,
+      counter: item.counter,
+      bbox: currentShape.getCentroid().x + ", " + currentShape.getCentroid().y
+    }));
+    shape.push(new OpenLayers.Feature.Vector(currentShape, {
+      project: item.project,
+      map: item.map,
+      counter: item.counter,
+      bbox: currentShape.getCentroid().x + ", " + currentShape.getCentroid().y
+    }));
+    if(jQuery.inArray(item.map, mapList) == -1)
+      mapList.push(item.map);
+    if((index+1) == arr.length) {
+      reset();
+      mapList.sort();
+      $.each(mapList, function(key, val) {
+        $('#mapset').append($('<option>', { value : val }).text(val));
+      });
     }
   });
 }
