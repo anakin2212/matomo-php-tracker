@@ -1,30 +1,17 @@
 <HTML>
 <HEAD>
 <link rel="stylesheet" href="../resources/themes/openlayers/style.css" type="text/css"/>
+<link rel="stylesheet" href="../resources/css/bootstrap.min.css" type="text/css"/>
+<link rel="stylesheet" href="../resources/css/plugins/matomo/intervention.css" type="text/css"/>
 <script src="../resources/jslib/jquery.min.js"></script>
 <script src="../resources/jslib/jquery.easyui.min.js"></script>
 <script src="../resources/jslib/OpenLayers.js"></script>
 <script src="../resources/jslib/proj4js.js"></script>
+<script src="../resources/jslib/bootstrap.min.js"></script>
+<!-- Scommentare quanto sotto solo per macchina geoweb-dev -->
 <!--script src="../config/config.dynamic.js"></script-->
 <script src="../config/config.js"></script>
  <TITLE>Punti intervento</TITLE>
- <style>
-      html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-      
-      #chicken {
-        border-radius: 5px;
-      }
-      #chicken_GroupDiv {
-        background-color: #C0C0C0;
-      }
-      #chicken_contentDiv {
-        background-color: #C0C0C0;
-      }
- </style>
 </HEAD>
 <BODY>
 <div id="map"></div>
@@ -49,6 +36,7 @@ $(document).ready(function() {
     fractionalZoom: true
     });
   var gmap = new OpenLayers.Layer.OSM("Mappa base", null);
+  gmap.tileOptions = {crossOriginKeyword: null};
   map.isValidZoomLevel = function(zoomLevel) {
     return (zoomLevel != null) && (zoomLevel >= 8);
   };
@@ -154,7 +142,7 @@ $(document).ready(function() {
         'EPSG:3857</a> coordinates: '
     }
   ));
-  map.addControl(new OpenLayers.Control.Navigation({
+  var navigation = new OpenLayers.Control.Navigation({
     defaultDblClick: function(event) {
       managePopup();
       if(map.getZoom() < 17) {
@@ -178,7 +166,46 @@ $(document).ready(function() {
       }
       OpenLayers.Control.Navigation.prototype.defaultDblClick.apply(this, arguments);
     }
-  }));
+  });
+  map.addControl(navigation);
+  var defaultControl = new OpenLayers.Control.DragPan({
+    iconclass:"glyphicon glyphicon-move",
+    title:"Sposta",
+  });
+  var zoomBox = new OpenLayers.Control.ZoomBox({
+    title: "Zoom box",
+    iconclass:"glyphicon glyphicon-zoom-in",
+    zoomBox: function (position) {
+      var currentZoom = map.getZoom();
+      var pixelY = parseInt((position.bottom - position.top) / 2) + position.top;
+      var pixelX = parseInt((position.right - position.left) / 2) + position.left;
+      var selectedLonLat = map.getLonLatFromPixel({x: pixelX, y: pixelY});
+      map.setCenter(selectedLonLat, currentZoom < 17 ? ((currentZoom + 2) < 17 ? currentZoom + 2 : 17) : currentZoom);
+    }
+  });
+  var zoomBack = new OpenLayers.Control.Button({
+    id: "zoomext",
+    trigger: function() {
+      map.setCenter(lonLat, 8);
+    },
+    iconclass:"glyphicon glyphicon-globe",
+    title:"Zoom estensione"
+  });
+  var panel = new OpenLayers.Control.Panel({
+    defaultControl: defaultControl,
+    displayClass: "toolbar",
+    createControlMarkup: function(control) {
+      var button = document.createElement('button'),
+      iconSpan = document.createElement('span'),
+      textSpan = document.createElement('span');
+      if(control.iconclass) iconSpan.className += control.iconclass;
+      button.appendChild(iconSpan);
+      button.appendChild(textSpan);
+      return button;
+    }
+  });
+  panel.addControls([defaultControl, zoomBox, zoomBack]);
+  map.addControl(panel)
   map.setCenter(lonLat, 8);
   setInterval(reloadPoint, 60000);
 });
@@ -237,7 +264,7 @@ function display(event) {
   } else {
     popup = new OpenLayers.Popup("chicken",
       new OpenLayers.LonLat(position.x, position.y),
-      new OpenLayers.Size(450,100),
+      new OpenLayers.Size(450,150),
       "<b>Totale visualizzazioni:</b> " + clusters[0].attributes.counter + "<hr>"
       + "<b>Progetto: </b>" + clusters[0].attributes.project + "<br>"
       + "<b>Mappa: </b>" + clusters[0].attributes.map + "<br>"
@@ -245,7 +272,7 @@ function display(event) {
       true);
   }
   map.addPopup(popup);
-  setTimeout(  managePopup, 3000);
+  setTimeout(  managePopup, 5000);
 }
 
 function displayPolygon(event) {
@@ -254,7 +281,7 @@ function displayPolygon(event) {
   var position = polygon.attributes.bbox.split(',');
   popup = new OpenLayers.Popup("chicken",
     new OpenLayers.LonLat($.trim(position[0]), $.trim(position[1])),
-    new OpenLayers.Size(450,100),
+    new OpenLayers.Size(450,150),
     "<b>Totale visualizzazioni:</b> " + polygon.attributes.counter + "<hr>"
       + "<b>Progetto: </b>" + polygon.attributes.project + "<br>"
       + "<b>Mappa: </b>" + polygon.attributes.map + "<br>"
