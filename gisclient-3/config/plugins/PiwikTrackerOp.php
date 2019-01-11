@@ -13,6 +13,7 @@ if(defined("TRACK") && defined("TRACK_SERVICE_LOCATION") && (strpos($_SERVER['PH
   // Specify an API token with at least Admin permission, so the Visitor IP address can be recorded
   // Learn more about token_auth: https://matomo.org/faq/general/faq_114/
   $piwikTracker->setTokenAuth(TRACK);
+  $piwikTracker->setRequestTimeout(10);
 
   $piwikTracker->setUserId($user->isAuthenticated() ? $user->getUsername() : "-anonymous_".session_id()."-");
   if($emptySession) {

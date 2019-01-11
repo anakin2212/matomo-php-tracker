@@ -1515,15 +1515,19 @@ class PiwikTracker
      * @ignore
      */
     static public $DEBUG_LAST_REQUESTED_URL = false;
-
     /**
      * @ignore
      */
     protected function sendRequest($url, $method = 'GET', $data = null, $force = false)
     {
-        error_log($url);
+        if(isset($_SESSION["PIWIK_FAILURE_LAST_TS"]) && time() < ($_SESSION["PIWIK_FAILURE_LAST_TS"] + 1800)) {
+          return false;
+        } else {
+          error_log("Reset timer di stato: nuova connessione verso server Matomo...");
+          unset($_SESSION["PIWIK_FAILURE_LAST_TS"]);
+        }
         self::$DEBUG_LAST_REQUESTED_URL = $url;
-
+        
         // if doing a bulk request, store the url
         if ($this->doBulkRequests && !$force) {
             $this->storedTrackingActions[]
@@ -1590,6 +1594,10 @@ class PiwikTracker
             ob_end_clean();
             $header = '';
             $content = '';
+            if (curl_errno($ch) == CURLE_OPERATION_TIMEDOUT) {
+              $_SESSION["PIWIK_FAILURE_LAST_TS"] = time();
+              error_log("Timeout scaduto: server Matomo in stato degradato");
+            } else
             if (!empty($response)) {
                 list($header, $content) = explode("\r\n\r\n", $response, $limitCount = 2);
             }
