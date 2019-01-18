@@ -2,19 +2,18 @@
   require_once("config.piwik.php");
   if(defined("TRACK")) {
     $SCRIPT_PLUGINS[] = "<script type=\"text/javascript\">
-      var _paq = _paq || [];
       configLoaded.then(initTrack)
       applicationReady.then(registerMapServerRequest);
       function initTrack() {
         $(document).ready(function() {
-          var u=\"//".TRACK_HOST."/piwik/\";
-          _paq.push(['setTrackerUrl', u+'piwik.php']);
-          _paq.push(['setSiteId', '".ID_TRACK_SITE."']);
-          _paq.push(['setUserId',clientConfig.CLIENT_ID]);
-          _paq.push(['trackPageView']);
-          _paq.push(['enableLinkTracking']);
-          var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-          g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+          $.get(GisClientMap.baseUrl + '".TRACK_CLIENT_REG_LOCATION."',
+            {
+              url: window.location.pathname + window.location.search,
+            },
+            function(returnedData){
+              if(returnedData != '')
+              window.alert(returnedData);
+            });
         });
       }
       function registerMapServerRequest() {

@@ -4,5 +4,6 @@ define('TRACK', 'codice_token_auth'); //valore stringale pari a "true" o "false"
 define('TRACK_HOST', "localhost");
 define('TRACK_ZOOM_OFFSET', 0);
 define('TRACK_SERVICE_LOCATION', '');
+define('TRACK_CLIENT_REG_LOCATION', '');
 define('TRACK_SRID', 'EPSG:25832');
 ?>
