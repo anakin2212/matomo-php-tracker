@@ -24,6 +24,9 @@ var features = [];
 var shape = [];
 var popup;
 
+$("#mapset").change(function() {
+  reloadPoint();
+});
 
 $(document).ready(function() {
   Proj4js.defs["EPSG:3857"] = Proj4js.defs["GOOGLE"];
@@ -199,6 +202,8 @@ $(document).ready(function() {
   setInterval(reloadPoint, 60000);
 });
 
+
+
 function reloadPoint() {
   features = [];
   shape = [];
@@ -208,37 +213,41 @@ function reloadPoint() {
     data: {action : "map", srid: "EPSG:3857", query_args: <?php echo "'".$_SERVER["QUERY_STRING"]."'" ?>},
     dataType: "json",
     success: function(data) {
+      var selected = $('#mapset').val();
       $("#mapset").find('option').remove().end();
       $("#mapset").css("display", (data.length > 0) ? "" : "none");
       if(data.length > 0)
-        populateFeaturesAndShapes(data);
+        populateFeaturesAndShapes(data, selected);
     }
   });
 }
 
-function populateFeaturesAndShapes(data) {
+function populateFeaturesAndShapes(data, selectedMap) {
   var mapList = ["- Nessuna mappa selezionata -"];
   data.forEach(function(item, index, arr) {
-    var currentShape = OpenLayers.Geometry.fromWKT(item.bbox);
-    features.push(new OpenLayers.Feature.Vector(currentShape.getCentroid(), {
-      project: item.project,
-      map: item.map,
-      counter: item.counter,
-      bbox: currentShape.getCentroid().x + ", " + currentShape.getCentroid().y
-    }));
-    shape.push(new OpenLayers.Feature.Vector(currentShape, {
-      project: item.project,
-      map: item.map,
-      counter: item.counter,
-      bbox: currentShape.getCentroid().x + ", " + currentShape.getCentroid().y
-    }));
+    //procedere all'aggiunta solo nel caso in cui selectedMap == "Nessuna mappa selezionata" or item.map == selectedMap
+    if(selectedMap == undefined || selectedMap == mapList[0] || selectedMap == item.map) {
+      var currentShape = OpenLayers.Geometry.fromWKT(item.bbox);
+      features.push(new OpenLayers.Feature.Vector(currentShape.getCentroid(), {
+        project: item.project,
+        map: item.map,
+        counter: item.counter,
+        bbox: currentShape.getCentroid().x + ", " + currentShape.getCentroid().y
+      }));
+      shape.push(new OpenLayers.Feature.Vector(currentShape, {
+        project: item.project,
+        map: item.map,
+        counter: item.counter,
+        bbox: currentShape.getCentroid().x + ", " + currentShape.getCentroid().y
+      }));
+    }
     if(jQuery.inArray(item.map, mapList) == -1)
       mapList.push(item.map);
     if((index+1) == arr.length) {
       reset();
       mapList.sort();
       $.each(mapList, function(key, val) {
-        $('#mapset').append($('<option>', { value : val }).text(val));
+        $('#mapset').append($('<option>', { value : val , selected: (val == selectedMap)}).text(val));
       });
     }
   });
