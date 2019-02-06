@@ -32,7 +32,7 @@
       $res=$stmt->fetchAll();
       if(($result == 1) && (count($res) == 1)) {
         $sql = 'update public.maprequest set counter = '.($res[0]["counter"] + 1)
-               .($res['contained']== true ? ', bbox='.parseGeoJSONPolygonGeometry($extent, $args["project"], $args["projection"]) : '')
+               .($res[0]['contained']== true ? ', bbox='.parseGeoJSONPolygonGeometry($extent, $args["project"], $args["projection"]) : '')
                .' where requestid = '.$res[0]["requestid"];
         $sqlArgs = array();
       } else {
