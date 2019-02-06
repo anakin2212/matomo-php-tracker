@@ -8,7 +8,7 @@ if(isset($_GET["url"])) {
   // Specify an API token with at least Admin permission, so the Visitor IP address can be recorded
   // Learn more about token_auth: https://matomo.org/faq/general/faq_114/
   $piwikTracker->setTokenAuth(TRACK);
-  $piwikTracker->setRequestTimeout(defined("TRACK_TIMEOUT") ? TRACK_TIMEOUT : 10);
+  $piwikTracker->setRequestTimeout(defined("TRACK_TIMEOUT") ? TRACK_TIMEOUT : 3);
   $piwikTracker->setUserId($user->isAuthenticated() ? $user->getUsername() : "-anonymous_".session_id()."-");
   if($emptySession) {
     $piwikTracker->setCustomTrackingParameter("dimension1", $_GET["url"]);
