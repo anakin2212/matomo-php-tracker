@@ -1,7 +1,7 @@
 <?php
 require_once("../../../../config/config.php");
 if(isset($_GET["url"])) {
-  PiwikTracker::$URL = 'https://'.TRACK_HOST.'/piwik/';
+  PiwikTracker::$URL = TRACK_PROTOCOL.'://'.TRACK_HOST.'/piwik/';
   $piwikTracker = new PiwikTracker(ID_TRACK_SITE);
   $emptySession = !isset($_COOKIE[GC_SESSION_NAME]);
   $user = new GCUser();

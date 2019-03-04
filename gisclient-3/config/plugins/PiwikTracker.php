@@ -1520,10 +1520,11 @@ class PiwikTracker
      */
     protected function sendRequest($url, $method = 'GET', $data = null, $force = false)
     {
-        if(isset($_SESSION["PIWIK_FAILURE_LAST_TS"]) && time() < ($_SESSION["PIWIK_FAILURE_LAST_TS"] + 1800)) {
+        $skipSending = false;
+        if(isset($_SESSION["PIWIK_FAILURE_LAST_TS"]) && time() < ($_SESSION["PIWIK_FAILURE_LAST_TS"] + (TRACK_RETRY_TIME * 60))) {
           return false;
         } else {
-          error_log("Reset timer di stato: nuova connessione verso server Matomo...");
+          $skipSending = isset($_SESSION["PIWIK_FAILURE_LAST_TS"]);
           unset($_SESSION["PIWIK_FAILURE_LAST_TS"]);
         }
         self::$DEBUG_LAST_REQUESTED_URL = $url;
@@ -1595,11 +1596,12 @@ class PiwikTracker
             $header = '';
             $content = '';
             if (curl_errno($ch) == CURLE_OPERATION_TIMEDOUT) {
-              $_SESSION["PIWIK_FAILURE_LAST_TS"] = time();
-              error_log("Timeout scaduto: server Matomo in stato degradato");
-            } else
-            if (!empty($response)) {
+              $this->manageDegradedConnection($skipSending);
+            } else {
+              $this->manageRestoredConnection(!$skipSending);
+              if (!empty($response)) {
                 list($header, $content) = explode("\r\n\r\n", $response, $limitCount = 2);
+              }
             }
             
             $this->parseIncomingCookies(explode("\r\n", $header));
@@ -1637,6 +1639,35 @@ class PiwikTracker
         }
 
         return $content;
+    }
+    
+    private function defaultMailHeaders() {
+      $headers  = "From: ".TRACK_MAIL_SENDER."\n";
+      $headers .= "X-Sender: ".TRACK_MAIL_SENDER."\n";
+      $headers .= 'X-Mailer: PHP/' . phpversion().'\n';
+      $headers .= "X-Priority: 1\n"; // Urgent message!
+      $headers .= "MIME-Version: 1.0\r\n";
+      $headers .= "Content-Type: text/html; charset=utf-8\n";
+      return $headers;
+    }
+    
+    protected function manageDegradedConnection($skipSending) {
+      $_SESSION["PIWIK_FAILURE_LAST_TS"] = time();
+      if(!$skipSending) {
+        error_log("Timeout scaduto: server Matomo in stato degradato");
+        $testo_mail = "La connessione della macchina <b>".gethostname()."</b> verso il server <b>".TRACK_HOST."</b> Matomo viene interrotta a causa di un timeout sul canale di comunicazione.<br/>";
+        $testo_mail .= "La connessione viene ripristinata e un nuovo tentativo di comunicazione viene effettuato dopo <b>".TRACK_RETRY_TIME." minuti</b>.<br/><br/>";
+        $testo_mail .= "Si prega nel mentre di verificare che le parti coinvolte siano funzionanti e in grado di comunicare tra loro.<br/>Il sistema Geoweb prosegue senza risentire della situazione di degrado, a meno di ulteriori problematiche verificatesi che siano indipendenti dal plugin Matomo.<br/><br/>Zio";
+        mail(TRACK_MAIL_RECEIVER,"Degrado connessione verso sistema Matomo",$testo_mail,$this->defaultMailHeaders());
+      }
+    }
+    
+    protected function manageRestoredConnection($skipSending) {
+      if(!$skipSending) {
+        $testo_mail = "La connessione della macchina <b>".gethostname()."</b> verso il server <b>".TRACK_HOST."</b> Matomo viene ripristinata.<br/>";
+        $testo_mail .= "Il sistema Geoweb ricomincia ad inviare informazioni al sistema Matomo a meno di ulteriori problematiche verificatesi che siano indipendenti dal plugin.<br/><br/>Zio";
+        mail(TRACK_MAIL_RECEIVER,"Degrado connessione verso sistema Matomo - RISOLTA",$testo_mail,$this->defaultMailHeaders());
+      }
     }
 
     /**

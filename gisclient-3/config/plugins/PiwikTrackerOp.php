@@ -7,7 +7,7 @@ require_once('DBFunctions.php');
 if(defined("TRACK") && defined("TRACK_SERVICE_LOCATION") && defined("TRACK_CLIENT_REG_LOCATION")
   && (strpos($_SERVER['PHP_SELF'], TRACK_SERVICE_LOCATION) === false)
   && (strpos($_SERVER['PHP_SELF'], TRACK_CLIENT_REG_LOCATION) === false)) {
-  PiwikTracker::$URL = 'https://'.TRACK_HOST.'/piwik/';
+  PiwikTracker::$URL = TRACK_PROTOCOL.'://'.TRACK_HOST.'/piwik/';
 
   $piwikTracker = new PiwikTracker(ID_TRACK_SITE);
   $emptySession = !isset($_COOKIE[GC_SESSION_NAME]);
