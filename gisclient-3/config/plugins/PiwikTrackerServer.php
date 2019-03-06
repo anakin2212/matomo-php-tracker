@@ -1,8 +1,8 @@
 <?php
 
 require_once('config.piwik.php');
-require_once('PiwikTracker.php');
-require_once('DBFunctions.php');
+require_once(ROOT_PATH.'lib/plugins/matomo/PiwikTracker.class.php');
+require_once(ROOT_PATH.'lib/plugins/matomo/DBFunctions.php');
 
 if(defined("TRACK") && defined("TRACK_SERVICE_LOCATION") && defined("TRACK_CLIENT_REG_LOCATION")
   && (strpos($_SERVER['PHP_SELF'], TRACK_SERVICE_LOCATION) === false)

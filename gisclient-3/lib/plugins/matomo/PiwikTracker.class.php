@@ -19,6 +19,8 @@
  * @package PiwikTracker
  * @api
  */
+include_once("PiwikWatchDog.class.php");
+
 class PiwikTracker
 {
     /**
@@ -161,6 +163,7 @@ class PiwikTracker
         
         $this->outgoingTrackerCookies = array();
         $this->incomingTrackerCookies = array();
+        $this->watchDog = PiwikWatchDog::Instance();
     }
 
     /**
@@ -1515,20 +1518,14 @@ class PiwikTracker
      * @ignore
      */
     static public $DEBUG_LAST_REQUESTED_URL = false;
-    /**
-     * @ignore
-     */
+
     protected function sendRequest($url, $method = 'GET', $data = null, $force = false)
     {
-        $skipSending = false;
-        if(isset($_SESSION["PIWIK_FAILURE_LAST_TS"]) && time() < ($_SESSION["PIWIK_FAILURE_LAST_TS"] + (TRACK_RETRY_TIME * 60))) {
+        $tmpWatchDog = $this->watchDog;
+        if($tmpWatchDog->isRedSemaphore())
           return false;
-        } else {
-          $skipSending = isset($_SESSION["PIWIK_FAILURE_LAST_TS"]);
-          unset($_SESSION["PIWIK_FAILURE_LAST_TS"]);
-        }
-        self::$DEBUG_LAST_REQUESTED_URL = $url;
-        
+        $notification = $tmpWatchDog->doRetryMatomoSending();
+
         // if doing a bulk request, store the url
         if ($this->doBulkRequests && !$force) {
             $this->storedTrackingActions[]
@@ -1595,10 +1592,12 @@ class PiwikTracker
             ob_end_clean();
             $header = '';
             $content = '';
-            if (curl_errno($ch) == CURLE_OPERATION_TIMEDOUT) {
-              $this->manageDegradedConnection($skipSending);
+            $errNo = curl_errno($ch);
+            //if ($errNo == CURLE_OPERATION_TIMEDOUT || $errNo == CURLE_COULDNT_CONNECT || $errNo == CURLE_COULDNT_RESOLVE_HOST) {
+            if($errNo != 0) {
+              $this->manageDegradedConnection($notification, $errNo, curl_error($ch));
             } else {
-              $this->manageRestoredConnection(!$skipSending);
+              $this->manageRestoredConnection($notification);
               if (!empty($response)) {
                 list($header, $content) = explode("\r\n\r\n", $response, $limitCount = 2);
               }
@@ -1651,19 +1650,23 @@ class PiwikTracker
       return $headers;
     }
     
-    protected function manageDegradedConnection($skipSending) {
-      $_SESSION["PIWIK_FAILURE_LAST_TS"] = time();
-      if(!$skipSending) {
-        error_log("Timeout scaduto: server Matomo in stato degradato");
-        $testo_mail = "La connessione della macchina <b>".gethostname()."</b> verso il server <b>".TRACK_HOST."</b> Matomo viene interrotta a causa di un timeout sul canale di comunicazione.<br/>";
-        $testo_mail .= "La connessione viene ripristinata e un nuovo tentativo di comunicazione viene effettuato dopo <b>".TRACK_RETRY_TIME." minuti</b>.<br/><br/>";
+    protected function manageDegradedConnection($notification, $errNo, $errDescr) {
+      $tmpWatchDog = $this->watchDog;
+      $tmpWatchDog->writeSemaphore(time());
+      if(!$notification) {
+        error_log("Timeout scaduto: server Matomo in stato degradato con codice ".$errNo);
+        $testo_mail = "La connessione della macchina <b>".gethostname()."</b> verso il server <b>".TRACK_HOST."</b> Matomo viene interrotta a causa di un errore sul canale di comunicazione.<br/><br/>";
+        $testo_mail .= "<b>Codice Errore:</b> ".$errNo." <br/><b>Descrizione sommaria restituita da CURL:</b> ".$errDescr."<br/><br/>";
+        $testo_mail .= "Un nuovo tentativo di comunicazione con il server viene effettuato tra <b>".TRACK_RETRY_TIME." minuti</b>.<br/><br/>";
         $testo_mail .= "Si prega nel mentre di verificare che le parti coinvolte siano funzionanti e in grado di comunicare tra loro.<br/>Il sistema Geoweb prosegue senza risentire della situazione di degrado, a meno di ulteriori problematiche verificatesi che siano indipendenti dal plugin Matomo.<br/><br/>Zio";
-        mail(TRACK_MAIL_RECEIVER,"Degrado connessione verso sistema Matomo",$testo_mail,$this->defaultMailHeaders());
+        mail(TRACK_MAIL_RECEIVER, "Degrado connessione verso sistema Matomo", $testo_mail, $this->defaultMailHeaders());
       }
     }
     
-    protected function manageRestoredConnection($skipSending) {
-      if(!$skipSending) {
+    protected function manageRestoredConnection($notification) {
+      $tmpWatchDog = $this->watchDog;
+      $tmpWatchDog->greenSemaphore();
+      if($notification) {
         $testo_mail = "La connessione della macchina <b>".gethostname()."</b> verso il server <b>".TRACK_HOST."</b> Matomo viene ripristinata.<br/>";
         $testo_mail .= "Il sistema Geoweb ricomincia ad inviare informazioni al sistema Matomo a meno di ulteriori problematiche verificatesi che siano indipendenti dal plugin.<br/><br/>Zio";
         mail(TRACK_MAIL_RECEIVER,"Degrado connessione verso sistema Matomo - RISOLTA",$testo_mail,$this->defaultMailHeaders());
