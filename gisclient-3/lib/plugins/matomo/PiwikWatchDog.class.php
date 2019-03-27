@@ -24,8 +24,10 @@ final class PiwikWatchDog {
                    //investigare qui se ci vuole true o false - piwiktracker
 
   public function greenSemaphore() {
-    if($this->doFileExist())
+    $result = $this->doFileExist();
+    if($result)
       unlink(TRACK_SEMAPHORE_FILEPATH);
+    return $result;
   }
 
   public function isRedSemaphore() {
@@ -41,9 +43,13 @@ final class PiwikWatchDog {
   }
   
   public function writeSemaphore($timestamp){
-    if(defined("TRACK_SEMAPHORE_FILEPATH"))
+    if(defined("TRACK_SEMAPHORE_FILEPATH")) {
       //file_put_contents esegue un rewrite del file, se presente
+      $result = $this->doFileExist();
       file_put_contents(TRACK_SEMAPHORE_FILEPATH, $timestamp);
+      return $result;
+    }
+    return true;
   }
   
   private function doFileExist() {

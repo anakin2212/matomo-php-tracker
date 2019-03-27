@@ -1652,8 +1652,8 @@ class PiwikTracker
     
     protected function manageDegradedConnection($notification, $errNo, $errDescr) {
       $tmpWatchDog = $this->watchDog;
-      $tmpWatchDog->writeSemaphore(time());
-      if(!$notification) {
+      $alreadyPresentFile = $tmpWatchDog->writeSemaphore(time());
+      if(!$notification && !$alreadyPresentFile) {
         error_log("Timeout scaduto: server Matomo in stato degradato con codice ".$errNo);
         $testo_mail = "La connessione della macchina <b>".gethostname()."</b> verso il server <b>".TRACK_HOST."</b> Matomo viene interrotta a causa di un errore sul canale di comunicazione.<br/><br/>";
         $testo_mail .= "<b>Codice Errore:</b> ".$errNo." <br/><b>Descrizione sommaria restituita da CURL:</b> ".$errDescr."<br/><br/>";
@@ -1665,8 +1665,8 @@ class PiwikTracker
     
     protected function manageRestoredConnection($notification) {
       $tmpWatchDog = $this->watchDog;
-      $tmpWatchDog->greenSemaphore();
-      if($notification) {
+      $stillPresent = $tmpWatchDog->greenSemaphore();
+      if($notification && $stillPresent) {
         $testo_mail = "La connessione della macchina <b>".gethostname()."</b> verso il server <b>".TRACK_HOST."</b> Matomo viene ripristinata.<br/>";
         $testo_mail .= "Il sistema Geoweb ricomincia ad inviare informazioni al sistema Matomo a meno di ulteriori problematiche verificatesi che siano indipendenti dal plugin.<br/><br/>Zio";
         mail(TRACK_MAIL_RECEIVER,"Degrado connessione verso sistema Matomo - RISOLTA",$testo_mail,$this->defaultMailHeaders());
