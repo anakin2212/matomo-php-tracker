@@ -18,12 +18,12 @@ if(defined("TRACK") && defined("TRACK_SERVICE_LOCATION") && defined("TRACK_CLIEN
   $piwikTracker->setRequestTimeout(defined("TRACK_TIMEOUT") ? TRACK_TIMEOUT : 10);
 
   $piwikTracker->setUserId($user->isAuthenticated() ? $user->getUsername() : "-anonymous_".session_id()."-");
-  if($emptySession) {
+  /*if($emptySession) {
     $piwikTracker->setCustomTrackingParameter("dimension1", $_SERVER['PHP_SELF']);
     $piwikTracker->setCustomTrackingParameter("dimension2", $_SERVER['REMOTE_ADDR']);
   }
 
-  $piwikTracker->doTrackPageView($_SERVER['PHP_SELF']);
+  $piwikTracker->doTrackPageView($_SERVER['PHP_SELF']);*/
 
   if(!empty($_POST['username']) && !empty($_POST['password']))
     $piwikTracker->doTrackEvent("Profilazione", "Operazione Login utente:".$_POST['username']);

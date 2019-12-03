@@ -16,6 +16,7 @@ if(isset($_GET["url"])) {
   }
   $piwikTracker->doTrackPageView($_GET["url"]);
   $mapsetAssignmentStr = substr($_GET["url"], strpos($_GET["url"], "mapset"));
+  $mapsetAssignmentStr = substr($mapsetAssignmentStr, 0, (strpos($mapsetAssignmentStr,"&")==FALSE ? strlen($mapsetAssignmentStr) : strpos($mapsetAssignmentStr,"&")));
   $piwikTracker->doTrackEvent("Invocazione Mapset", "Richiamata pagina di visualizzazione mappa :".substr($mapsetAssignmentStr, strpos($mapsetAssignmentStr, "=")+1));
 }
 ?>
